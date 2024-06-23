@@ -1,0 +1,7 @@
+---
+title: "source"
+---
+
+I used the [NBA 1996-2023 Player Statistics](https://www.kaggle.com/datasets/justinas/nba-players-data) data set for this project, which I found through [Kaggle](https://www.kaggle.com/), a website that has all sorts of datasets.
+
+After a thorough examination of the data, I realized that there was no need for cleaning. Each player's data contained valid values without any NA or unusable entries. Furthermore, since I intended to utilize all attributes and columns to analyze how the league evolved, I found this aspect to be quite satisfactory.

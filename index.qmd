@@ -1,7 +1,52 @@
 ---
-title: "."
+title: "NBA Players Analysis by performance metrics and attributes"
+author: "Lowell Ethan"
+execute: 
+  echo: FALSE
+  message: FALSE
 ---
 
-This is a Quarto website.
+```{r}
+#| echo: FALSE
+#| message: FALSE
+library(tidyverse)
+library(plotly)
+```
 
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
+*How do various player attributes and performance metrics correlate with each other and evolve over different seasons in the NBA?*
+
+```{r}
+#| echo: FALSE
+#| message: FALSE
+#| fig-width: 12
+#| fig-height: 14
+# Load the data
+data <- read_csv("data/all_seasons.csv")
+
+# Calculate weight-height ratio
+data <- data %>%
+  mutate(weight_height_ratio = player_weight / (player_height / 100)) # Convert height to meters
+
+# Create a 3D scatter plot with plotly and NBA colorscale
+p <- plot_ly(data, x = ~age, y = ~pts, z = ~weight_height_ratio,
+              text = ~paste(player_name, team_abbreviation, season), type = "scatter3d", mode = "markers",
+              marker = list(size = 3, color = ~player_weight, colorscale = "Portland"),  # Using Portland colorscale
+              hovertemplate = paste('<b>Player:</b> %{text}<br>',
+                                    '<b>Age:</b> %{x}<br>',
+                                    '<b>Points Scored:</b> %{y}<br>',
+                                    '<b>Weight/Height:</b> %{z:.2f} kg/m',
+                                    '<extra></extra>'))
+
+# Customize the layout
+p <- p %>% layout(title = NULL,
+                   scene = list(xaxis = list(title = "Age"),
+                                yaxis = list(title = "Points Scored"),
+                                zaxis = list(title = "Weight-Height Ratio (kg/m)")))
+
+# Display the plot
+p
+```
+## Project Summary
+
+Over the span of 1996 to 2023, the NBA underwent a dynamic transformation both on and off the court. This era witnessed a shift in playing styles towards a faster pace, emphasizing three-point shooting and versatility among players. The league's global reach expanded significantly with the rise of international players, while technological advancements in analytics and sports science revolutionized player development and performance analysis. Financially, the NBA experienced substantial growth driven by lucrative media deals and increased fan engagement through digital platforms and social media. These changes, alongside shifts in player movement and team compositions, set the stage for a comprehensive analysis of how player attributes and performance metrics evolved over time in response to these transformative trends.
+

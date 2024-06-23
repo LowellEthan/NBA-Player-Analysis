@@ -1,0 +1,20 @@
+---
+title: "analysis"
+execute: 
+  echo: FALSE
+---
+
+```{r}
+#| message: FALSE
+library(tidyverse)
+library(gganimate)
+library(dplyr)
+library(gifski)
+```
+
+```{r}
+#| message: FALSE
+
+```
+
+

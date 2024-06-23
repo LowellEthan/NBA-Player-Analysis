@@ -2,16 +2,21 @@ project:
   type: website
 
 website:
-  title: "."
+  title: "NBA players from 1996-2023"
   navbar:
     left:
       - href: index.qmd
         text: Home
-      - about.qmd
+      - href: analysis.qmd
+        text: Analysis
+      - href: about.qmd
+        text: Author
+      - href: source.qmd
+        text: Source
 
 format:
   html:
-    theme: cosmo
+    theme: lux
     css: styles.css
     toc: true
 

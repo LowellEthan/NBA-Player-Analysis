@@ -7,14 +7,95 @@ execute:
 ```{r}
 #| message: FALSE
 library(tidyverse)
+library(ggplot2)
 library(gganimate)
-library(dplyr)
-library(gifski)
+library(plotly)
 ```
 
 ```{r}
 #| message: FALSE
-
+nba_data <- read_csv("data/all_seasons.csv")
 ```
 
+## Average Player Metrics per Draft Round
+```{r}
+#| warning: FALSE
+draft_round_avg <- nba_data %>%
+  group_by(draft_round) %>%
+  summarize(across(c(pts, reb, ast, net_rating), mean, na.rm = TRUE))
+
+ggplot(draft_round_avg, aes(x = draft_round)) +
+  geom_bar(aes(y = pts, fill = "Points"), stat = "identity", position = "dodge", alpha = 0.7) +
+  geom_bar(aes(y = reb, fill = "Rebounds"), stat = "identity", position = "dodge", alpha = 0.7) +
+  geom_bar(aes(y = ast, fill = "Assists"), stat = "identity", position = "dodge", alpha = 0.7) +
+  geom_bar(aes(y = net_rating, fill = "Net Rating"), stat = "identity", position = "dodge", alpha = 0.7) +
+  labs(title = NULL, x = "Draft Round", y = "Average Value") +
+  theme_minimal() +
+  scale_fill_manual(name = "Metrics", values = c("Points" = "blue", "Rebounds" = "red", "Assists" = "green", "Net Rating" = "purple"))
+```
+This graph displays bars for points (pts), rebounds (reb), assists (ast), and net rating (net_rating), with each bar representing the average value of a specific metric for players drafted in a particular round. The x-axis denotes the draft round, ranging from the first round to later rounds, while the y-axis indicates the average value of the metrics. Different colors are used for each metric (blue for Points, red for Rebounds, green for Assists, and purple for Net Rating) to visually differentiate them. The key takeaways are that there is generally no difference or trend between the draft round, over the 27 seasons of the NBA. Although you would expect points to generally decrease, there is a general trend of stagnation with all of the draft rounds, just liek the rest of the metrics.
+
+## Draft Number vs. Points by season with respect to Team Plays
+```{r}
+# df <- nba_data %>%
+#   mutate(draft_number = as.numeric(draft_number),
+#          pts = as.numeric(pts),
+#          usg_pct = as.numeric(usg_pct))
+# 
+# p <- ggplot(df, aes(x = draft_number, y = pts, size = usg_pct)) +
+#   geom_point(alpha = 0.7) + 
+#   geom_smooth(method = "lm", se = FALSE, color = "blue") +
+#   labs(title = 'Season: {closest_state}', x = 'Draft Number', y = 'Points') +
+#   theme_minimal() +
+#   transition_states(season, transition_length = 2, state_length = 1) +
+#   scale_size_continuous(name = "Team Plays", range = c(1, 6))
+# 
+# anim <- animate(p, renderer = gifski_renderer(), width = 800, height = 600)
+# 
+# anim_save("nba_draft_animation.gif", anim)
+```
+
+![](nba_draft_animation.gif)
+
+This animated graph visualizes the relationship between NBA draft number, points scored (pts), and usage percentage (usg_pct) across different seasons. Each point represents a player's draft number and their corresponding points scored, with the size of the point indicating their usage percentage. The blue line represents the linear regression trend, showing the overall relationship between draft number and points scored. The animation transitions through different seasons, allowing viewers to observe how these relationships evolve over time. The graph suggests that there might be a correlation between draft number and points scored, with higher draft numbers generally associated with lower point production, although the impact of usage percentage also plays a role in this relationship. There is a generally a negative slope with the points/team plays, over the seasons, showing that although strategy changed with the 3 point line becoming more prevelant in the growing years of the NBA, points, and trends generally stayed the same.
+
+## Shooting Efficiency by Season
+```{r}
+p <- ggplot(nba_data, aes(x=season, y=ts_pct, fill=player_name)) +
+     geom_bar(stat="identity") +
+     labs(title=NULL, x="Season", y="Shooting Efficiency") +
+     theme_minimal() +
+     theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplotly(p, tooltip=c("y", "fill")) %>%
+  layout(hovermode = "closest", showlegend = FALSE) %>%
+  config(displayModeBar = FALSE)
+```
+
+In this graph, each bar represents the shooting efficiency of a specific player during a particular season, with individual players distinguished by different colors. The x-axis displays the NBA seasons, allowing viewers to observe how three-point shooting percentages vary over time. This graph is interactive, enabling users to hover over bars and view specific data points such as the player's name and their corresponding three-point percentage for a particular season. The three point line plays a greater role as the NBA changes, with more and more people choosing to shoot farther away than run up, changing strategy, and generally the amount of points scored. Although not shown in the graph, before 1979 (when the three point line was added), the points per game would generally be lower as players had to move more to gain lower points, while after the three points a significant surge of points per game increased, following that 3 point percentages rose, and continue to rise as evident in the graph.
+
+## Average Stats per Season
+```{r}
+avg_stats <- nba_data %>%
+  group_by(season) %>%
+  summarize(avg_pts = mean(pts),
+            avg_reb = mean(reb),
+            avg_ast = mean(ast))
+
+avg_stats$season <- factor(avg_stats$season, levels = unique(avg_stats$season))
+
+ggplot(avg_stats, aes(x = season)) +
+  geom_bar(aes(y = avg_pts, fill = "Points"), stat = "identity", alpha = 0.6) +
+  geom_bar(aes(y = avg_reb, fill = "Rebounds"), stat = "identity", alpha = 0.6) +
+  geom_bar(aes(y = avg_ast, fill = "Assists"), stat = "identity", alpha = 0.6) +
+  scale_fill_manual(values = c("Points" = "blue", "Rebounds" = "green", "Assists" = "red")) +
+  labs(title = NULL,
+       x = "Season",
+       y = "Average Value",
+       fill = "Attribute") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+It showcases bars for average points (avg_pts), rebounds (avg_reb), and assists (avg_ast) per season. Each bar represents the average value of a specific metric for a given NBA season, with different colors used to differentiate between metrics (blue for Points, green for Rebounds, and red for Assists). The x-axis indicates the NBA seasons, allowing viewers to track changes in average player performance over time, while the y-axis represents the average value of the metrics, providing a clear comparison of player statistics across different seasons. As 3 point percentage increased, points also increased dropped by players, although assists and rebounds stayed the same, the increase in points per player really shows the impact the 3 point line had on the NBA.
 
